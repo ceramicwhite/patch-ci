@@ -6,6 +6,19 @@
  
  ARG  REPO=https://github.com/zedeus/nitter.git
  
+@@ -18,8 +18,11 @@
+ &&  nimble install -y --depsOnly \
+ &&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
+ &&  strip -s nitter \
+-&&  nimble scss \
+-&&  nimble md
++&&  nimble scss
++
++COPY ./about.md /build/public/md/about.md
++
++RUN nimble md
+
+
 @@ -35,7 +35,7 @@
       NITTER_NAME="nitter" \
       NITTER_THEME="Nitter" \
