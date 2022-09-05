@@ -19,12 +19,29 @@
 +RUN nimble md
  
  # ---------------------------------------------------------------------
- 
-@@ -35,7 +35,7 @@
+@@ -30,7 +30,7 @@
+-ENV  REDIS_HOST="localhost" \
++ENV  REDIS_HOST="redis" \
+-      REDIS_PASS="" \
++      REDIS_PASS="moneyprintergobrrr" \
+      REDIS_PORT=6379 \
+      NITTER_HTTPS="false" \
+      NITTER_HOST="nitter.net" \
       NITTER_NAME="nitter" \
-      NITTER_THEME="Nitter" \
+-      NITTER_THEME="Nitter"
++      NITTER_THEME="auto_(twitter)" \
       REPLACE_TWITTER="nitter.net" \
--     REPLACE_YOUTUBE="piped.kavin.rocks" \
-+     REPLACE_YOUTUBE="invidio.us" \
+      REPLACE_YOUTUBE="piped.kavin.rocks" \
       REPLACE_REDDIT="teddit.net" \
       REPLACE_INSTAGRAM=""
+
+@@ -51,8 +51,7 @@
+-&&  apk add --no-cache tini curl pcre su-exec
++&&  apk add --no-cache curl pcre su-exec
+
+@@ -58,7 @@
+-HEALTHCHECK CMD curl --fail http://localhost:8080 || exit 1
+
+@@ -60,7 +60,7 @@
+-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
++ENTRYPOINT ["/entrypoint.sh"]
