@@ -1,5 +1,4 @@
---- Dockerfile.1
-+++ Dockerfile
+
 @@ -1,43 +1,45 @@
 -FROM nimlang/nim:alpine as build
 +FROM ghcr.io/maxisoft/nim-docker-images/nim as build
