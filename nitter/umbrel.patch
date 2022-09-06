@@ -1,47 +1,94 @@
---- Dockerfile.1	2022-05-20 16:04:10.693905933 +0000
-+++ Dockerfile	2022-05-20 16:07:01.887924669 +0000
-@@ -1,4 +1,4 @@
+--- Dockerfile.1
++++ Dockerfile
+@@ -1,43 +1,45 @@
 -FROM nimlang/nim:alpine as build
 +FROM ghcr.io/maxisoft/nim-docker-images/nim as build
  
  ARG  REPO=https://github.com/zedeus/nitter.git
  
-@@ -18,8 +18,11 @@
- &&  nimble install -y --depsOnly \
- &&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
- &&  strip -s nitter \
+ RUN apk update \
+-&&  apk add libsass-dev \
++        &&  apk add libsass-dev \
+         libffi-dev \
+-	openssl-dev \
+-	pcre \
+-	unzip \
+-	git \
+-&&  mkdir -p /build
++        openssl-dev \
++        pcre \
++        unzip \
++        git \
++        &&  mkdir -p /build
+ 
+ WORKDIR /build
+-    
++
+ RUN set -ex \
+-&&  git clone $REPO . \
+-&&  nimble install -y --depsOnly \
+-&&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
+-&&  strip -s nitter \
 -&&  nimble scss \
 -&&  nimble md
-+&&  nimble scss
++        &&  git clone $REPO . \
++        &&  nimble install -y --depsOnly \
++        &&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
++        &&  strip -s nitter \
++        &&  nimble scss
 +
 +COPY ./about.md /build/public/md/about.md
-+
-+RUN nimble md
  
++RUN nimble md
  # ---------------------------------------------------------------------
-@@ -30,7 +30,7 @@
--ENV  REDIS_HOST="localhost" \
+ 
+ FROM alpine:3.13
+ 
+-LABEL maintainer="ken@epenguin.com"
 +ENV  REDIS_HOST="redis" \
--      REDIS_PASS="" \
-+      REDIS_PASS="moneyprintergobrrr" \
-      REDIS_PORT=6379 \
-      NITTER_HTTPS="false" \
-      NITTER_HOST="nitter.net" \
-      NITTER_NAME="nitter" \
--      NITTER_THEME="Nitter"
-+      NITTER_THEME="auto_(twitter)" \
-      REPLACE_TWITTER="nitter.net" \
-      REPLACE_YOUTUBE="piped.kavin.rocks" \
-      REPLACE_REDDIT="teddit.net" \
-      REPLACE_INSTAGRAM=""
-
-@@ -51,8 +51,7 @@
++        REDIS_PASS="moneyprintergobrrr" \
++        REDIS_PORT=6379 \
++        NITTER_HTTPS="false" \
++        NITTER_HOST="nitter.net" \
++        NITTER_NAME="nitter" \
++        NITTER_THEME="auto_(twitter)" \
++        REPLACE_TWITTER="nitter.net" \
++        REPLACE_YOUTUBE="piped.kavin.rocks" \
++        REPLACE_REDDIT="teddit.net" \
++        REPLACE_INSTAGRAM=""
++
+ 
+-ENV  REDIS_HOST="localhost" \
+-     REDIS_PASS="" \
+-     REDIS_PORT=6379 \
+-     NITTER_HTTPS="false" \
+-     NITTER_HOST="nitter.net" \
+-     NITTER_NAME="nitter" \
+-     NITTER_THEME="Nitter" \
+-     REPLACE_TWITTER="nitter.net" \
+-     REPLACE_YOUTUBE="piped.kavin.rocks" \
+-     REPLACE_REDDIT="teddit.net" \
+-     REPLACE_INSTAGRAM=""
+ 
+ COPY ./entrypoint.sh /entrypoint.sh
+ COPY ./nitter.conf.pre /dist/nitter.conf.pre
+@@ -46,15 +48,13 @@ COPY --from=build /build/nitter /usr/local/bin
+ COPY --from=build /build/public /build/public
+ 
+ RUN set -eux \
+-&&  addgroup -g 82 www-data \
+-&&  adduser -u 82 -G www-data -h /data -D www-data \
 -&&  apk add --no-cache tini curl pcre su-exec
-+&&  apk add --no-cache curl pcre su-exec
-
-@@ -58,7 @@
++        &&  addgroup -g 82 www-data \
++        &&  adduser -u 82 -G www-data -h /data -D www-data \
++        &&  apk add --no-cache curl pcre su-exec
+ 
+ WORKDIR /data
+ VOLUME  /data
+ 
+ EXPOSE  8080
+ 
 -HEALTHCHECK CMD curl --fail http://localhost:8080 || exit 1
-
-@@ -60,7 +60,7 @@
+-
 -ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 +ENTRYPOINT ["/entrypoint.sh"]

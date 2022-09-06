@@ -66,11 +66,11 @@ jobs:
           cp ./nitter/* ./nitter-git
         shell: bash
 
-      - name: Apply normal patch
+      - name: Apply Umbrel patch
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           cd ./nitter-git
-          patch Dockerfile < normal.patch
+          patch Dockerfile < umbrel.patch
         shell: bash
 
       - name: Build and push docker image
