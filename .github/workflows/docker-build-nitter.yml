@@ -82,5 +82,7 @@ jobs:
           file: ./nitter-git/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ${{ github.repository }}:dev #, ${{ github.repository }}:build-${{ env.timestamp }}
+          tags: ceramicwhite/nitter:dev #, ceramicwhite/nitter:build-${{ env.timestamp }}
 
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
