@@ -80,7 +80,7 @@ jobs:
         with:
           context: ./nitter-git
           file: ./nitter-git/Dockerfile
-          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ceramicwhite/nitter:latest, ceramicwhite/nitter:build-${{ env.timestamp }}
+          tags: ${{ github.repository }}:dev #, ${{ github.repository }}:build-${{ env.timestamp }}
 
