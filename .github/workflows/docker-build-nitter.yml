@@ -82,7 +82,7 @@ jobs:
           file: ./nitter-git/Dockerfile
           platforms: linux/amd64,linux/arm64/v8
           push: true
-          tags: ceramicwhite/nitter:dev, ceramicwhite/nitter:build-${{ env.timestamp }}
+          tags: ceramicwhite/nitter:latest, ceramicwhite/nitter:build-${{ env.timestamp }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
