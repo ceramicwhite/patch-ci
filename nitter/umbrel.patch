@@ -92,3 +92,4 @@
 -
 -ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 +ENTRYPOINT ["/entrypoint.sh"]
+--
