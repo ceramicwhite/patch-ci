@@ -1,95 +1,87 @@
---- Dockerfile.1
-+++ Dockerfile
-@@ -1,43 +1,45 @@
--FROM nimlang/nim:alpine as build
-+FROM ghcr.io/maxisoft/nim-docker-images/nim as build
- 
- ARG  REPO=https://github.com/zedeus/nitter.git
- 
- RUN apk update \
--&&  apk add libsass-dev \
-+        &&  apk add libsass-dev \
-         libffi-dev \
--	openssl-dev \
--	pcre \
--	unzip \
--	git \
--&&  mkdir -p /build
-+        openssl-dev \
-+        pcre \
-+        unzip \
-+        git \
-+        &&  mkdir -p /build
- 
- WORKDIR /build
--    
-+
- RUN set -ex \
--&&  git clone $REPO . \
--&&  nimble install -y --depsOnly \
--&&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
--&&  strip -s nitter \
--&&  nimble scss \
--&&  nimble md
-+        &&  git clone $REPO . \
-+        &&  nimble install -y --depsOnly \
-+        &&  nimble build -y -d:release --passC:"-flto" --passL:"-flto" \
-+        &&  strip -s nitter \
-+        &&  nimble scss
-+
-+COPY ./about.md /build/public/md/about.md
- 
-+RUN nimble md
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -25,21 +25,19 @@ COPY ./about.md /build/public/md/about.md
+ RUN nimble md
  # ---------------------------------------------------------------------
  
- FROM alpine:3.13
- 
--LABEL maintainer="ken@epenguin.com"
-+ENV  REDIS_HOST="redis" \
-+        REDIS_PASS="moneyprintergobrrr" \
-+        REDIS_PORT=6379 \
-+        NITTER_HTTPS="false" \
-+        NITTER_HOST="nitter.net" \
-+        NITTER_NAME="nitter" \
-+        NITTER_THEME="auto_(twitter)" \
-+        REPLACE_TWITTER="nitter.net" \
-+        REPLACE_YOUTUBE="piped.kavin.rocks" \
-+        REPLACE_REDDIT="teddit.net" \
-+        REPLACE_INSTAGRAM=""
+-FROM alpine:3.13
+-
+-ENV  REDIS_HOST="redis" \
+-        REDIS_PASS="moneyprintergobrrr" \
+-        REDIS_PORT=6379 \
+-        NITTER_HTTPS="false" \
+-        NITTER_HOST="nitter.net" \
+-        NITTER_NAME="nitter" \
+-        NITTER_THEME="auto_(twitter)" \
+-        REPLACE_TWITTER="nitter.net" \
+-        REPLACE_YOUTUBE="piped.kavin.rocks" \
+-        REPLACE_REDDIT="teddit.net" \
+-        REPLACE_INSTAGRAM=""
+-
+-
++FROM alpine:3.16.2
 +
- 
--ENV  REDIS_HOST="localhost" \
--     REDIS_PASS="" \
--     REDIS_PORT=6379 \
--     NITTER_HTTPS="false" \
--     NITTER_HOST="nitter.net" \
--     NITTER_NAME="nitter" \
--     NITTER_THEME="Nitter" \
--     REPLACE_TWITTER="nitter.net" \
--     REPLACE_YOUTUBE="piped.kavin.rocks" \
--     REPLACE_REDDIT="teddit.net" \
--     REPLACE_INSTAGRAM=""
++ENV REDIS_HOST="redis" \
++    REDIS_PASS="moneyprintergobrrr" \
++    REDIS_PORT=6379 \
++    NITTER_HTTPS="false" \
++    NITTER_HOST="nitter.net" \
++    NITTER_NAME="nitter" \
++    NITTER_THEME="auto_(twitter)" \
++    REPLACE_TWITTER="nitter.net" \
++    REPLACE_YOUTUBE="piped.kavin.rocks" \
++    REPLACE_REDDIT="teddit.net" \
++    REPLACE_INSTAGRAM=""
  
  COPY ./entrypoint.sh /entrypoint.sh
  COPY ./nitter.conf.pre /dist/nitter.conf.pre
-@@ -46,15 +48,13 @@ COPY --from=build /build/nitter /usr/local/bin
+@@ -48,13 +46,13 @@ COPY --from=build /build/nitter /usr/local/bin
  COPY --from=build /build/public /build/public
  
  RUN set -eux \
--&&  addgroup -g 82 www-data \
--&&  adduser -u 82 -G www-data -h /data -D www-data \
--&&  apk add --no-cache tini curl pcre su-exec
-+        &&  addgroup -g 82 www-data \
-+        &&  adduser -u 82 -G www-data -h /data -D www-data \
-+        &&  apk add --no-cache curl pcre su-exec
+-        &&  addgroup -g 82 www-data \
+-        &&  adduser -u 82 -G www-data -h /data -D www-data \
+         &&  apk add --no-cache curl pcre su-exec
  
++USER 1000:1000
++
  WORKDIR /data
  VOLUME  /data
  
  EXPOSE  8080
  
--HEALTHCHECK CMD curl --fail http://localhost:8080 || exit 1
--
--ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+-ENTRYPOINT ["/entrypoint.sh"]
 +ENTRYPOINT ["/entrypoint.sh"]
---
+\ No newline at end of file
+diff --git a/entrypoint.sh b/entrypoint.sh
+index 25cc1c1..7336d95 100755
+--- a/entrypoint.sh
++++ b/entrypoint.sh
+@@ -23,9 +23,6 @@ build_working_dir()
+ 
+     [ -d $WORKD/tmp ]         || mkdir -p $WORKD/tmp
+     [ -d $WORKD/public ]      || cp -rf $BUILD/public      $WORKD/.
+-
+-    chown -R www-data:www-data $WORKD
+-    chmod 777 $WORKD
+ }
+ 
+ construct_nitter_conf()
+@@ -44,13 +41,12 @@ construct_nitter_conf()
+ 	    | sed "s/REPLACE_REDDIT/$REPLACE_REDDIT/g" \
+ 	    | sed "s/REPLACE_INSTAGRAM/$REPLACE_INSTAGRAM/g" > $WORKD/nitter.conf
+     fi
+-    chown www-data:www-data $WORKD/nitter.conf
+ }
+ 
+ run_nitter_program()
+ {
+     cd $WORKD
+-    exec su-exec www-data:www-data /usr/local/bin/nitter
++	exec /usr/local/bin/nitter
+ }
+ 
+ # -- program starts
+-- 
+
+
