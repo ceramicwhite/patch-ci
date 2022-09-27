@@ -1,5 +1,5 @@
---- a/Dockerfile
-+++ b/Dockerfile
+--- Dockerfile.1
++++ Dockerfile
 @@ -25,21 +25,19 @@ COPY ./about.md /build/public/md/about.md
  RUN nimble md
  # ---------------------------------------------------------------------
