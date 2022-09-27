@@ -70,7 +70,8 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           cd ./nitter-git
-          patch Dockerfile < umbrel.patch
+          patch Dockerfile < umbrel-dockerfile.patch
+          patch entrypoint.sh < umbrel-entrypoint.patch
         shell: bash
 
       - name: Build and push docker image
